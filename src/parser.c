@@ -4,9 +4,11 @@
 #include <stdlib.h>
 #include "memory.h"
 
-
+//Declaration of extern memory variables
+GHashTable* names;
 int MEMORY[MEMORY_SIZE];
 int DATA_SEGMENT;
+int CODE_SEGMENT;
 
 void find_name(char *current_command, char *line){
     for(int i = 0; i < strlen(line); i++){
@@ -65,27 +67,69 @@ void set_data_segment(char *line){
     DATA_SEGMENT = get_value(address); 
 }
 
+void set_code_segment(char *line){
+    char address[10];
+    next(4, line, address);
+    CODE_SEGMENT = get_value(address); 
+}
+
 int get_value(char *str){
     return atoi(str);
 }
 
-int  find_variables(FILE *file){
-    printf("Finding variables...\n");
+void initialize_names(){
+    names = g_hash_table_new(g_str_hash, g_int_hash);
+}
+
+int  find_variables(FILE *file){//TODO Now only supported variable type is integer and code should be better.
+    printf("Finding variables... \n");
+   
+    initialize_names(); 
     char line[100];
     char current_token[20];
-    int counter = 0;
-
+    char variable_name[20];
+    int counter = -1;
+    int position;
+    
     while (fgets(line, 100, file) != NULL){
+        position = 0;
   	find_name(current_token, line);
-        if (strcmp(current_token, "ORG") == 0 && counter == 0){
+        position += strlen(current_token) + 1;
+        if (strcmp(current_token, "ORG") == 0){
+	    switch(counter){
+		case -1:
+	    	    set_data_segment(line);
+	    	    printf("Data segment starts at: 0x%x\n", DATA_SEGMENT);
+		    break;
+		default:
+		    set_code_segment(line);
+	    	    printf("Code segment starts at: 0x%x\n", CODE_SEGMENT);
+		    return 1;
+	    }
             counter ++;
-	    set_data_segment(line);
+	}else{
+            strcpy(variable_name, current_token);
+	    next(position, line, current_token);
+
+	    /*if (strcmp(current_token, "DS") == 0){
+ 		variable.type = INTEGER;
+	    }else{
+		exit(1);//TODO hata çıktıları belirtilmeli.
+	    }*/
+
+            position += strlen(current_token) + 1;
+	    next(position, line, current_token);
+ 	    int value = get_value(current_token);
+	    MEMORY[CODE_SEGMENT + counter + 1] = value;
+            g_hash_table_insert(names, variable_name, CODE_SEGMENT + counter + 1);
+            printf("Variable %s at %x\n", variable_name, CODE_SEGMENT + counter + 1);
+            counter ++;
 	} 	
     }
 }
 
 void find_labels(FILE *file){
-	printf("Find labels...\n");
+	printf("Finding labels...\n");
 }
 
 void parse(FILE *file){

@@ -1,11 +1,6 @@
 #include <glib.h>
 #define MEMORY_SIZE 32768
-
-typedef struct{
-    int type;
-    int address;
-}variable;
-
+#define INTEGER 1
 
 extern int MEMORY[];
 extern GHashTable* names;
