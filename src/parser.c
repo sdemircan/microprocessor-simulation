@@ -110,17 +110,11 @@ int  find_variables(FILE *file){//TODO Now only supported variable type is integ
 	}else{
             strcpy(variable_name, current_token);
 	    next(position, line, current_token);
-
-	    /*if (strcmp(current_token, "DS") == 0){
- 		variable.type = INTEGER;
-	    }else{
-		exit(1);//TODO hata çıktıları belirtilmeli.
-	    }*/
-
             position += strlen(current_token) + 1;
 	    next(position, line, current_token);
  	    int value = get_value(current_token);
-	    MEMORY[CODE_SEGMENT + counter + 1] = value;
+	    
+            MEMORY[CODE_SEGMENT + counter + 1] = value;
             g_hash_table_insert(names, variable_name, CODE_SEGMENT + counter + 1);
             printf("Variable %s at %x\n", variable_name, CODE_SEGMENT + counter + 1);
             counter ++;
