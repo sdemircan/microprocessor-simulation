@@ -66,7 +66,7 @@ void set_data_segment(char *line){
 }
 
 int get_value(char *str){
-    return 15;
+    return atoi(str);
 }
 
 int  find_variables(FILE *file){
@@ -78,6 +78,7 @@ int  find_variables(FILE *file){
     while (fgets(line, 100, file) != NULL){
   	find_name(current_token, line);
         if (strcmp(current_token, "ORG") == 0 && counter == 0){
+            counter ++;
 	    set_data_segment(line);
 	} 	
     }

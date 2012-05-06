@@ -11,7 +11,7 @@ int get_value(char *str);
 void find_name(char *current_command, char *line);
 void parse(FILE *file);
 int find_variables(FILE *file); //Puts variables in memory.
-void find_labels(FIlE *file);
+void find_labels(FILE *file);
 
 
 //Command Parsers
