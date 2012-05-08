@@ -6,13 +6,11 @@
 static  GHashTable* command_parser;
 static GHashTable* opcode;
 
-int get_value(char *str);
+
 //Parser methods
-void find_name(char *current_command, char *line);
 void parse(FILE *file);
-int find_variables(FILE *file); //Puts variables in memory.
-void find_labels(FILE *file);
 
 
 //Command Parsers
 void set_data_segment(char *line); //Sets DATA_SEGMENT  and returns line number of code segment's start.
+void set_code_segment(char *line); //Sets DATA_SEGMENT  and returns line number of code segment's start.

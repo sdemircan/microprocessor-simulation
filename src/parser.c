@@ -10,6 +10,9 @@ int MEMORY[MEMORY_SIZE];
 int DATA_SEGMENT;
 int CODE_SEGMENT;
 
+int data_segment_counter = -1;
+int code_segment_counter = 0;
+
 void find_name(char *current_command, char *line){
     for(int i = 0; i < strlen(line); i++){
         if (line[i] != ' ' && line[i] != '\n'){
@@ -88,7 +91,6 @@ int  find_variables(FILE *file){//TODO Now only supported variable type is integ
     char line[100];
     char current_token[20];
     char variable_name[20];
-    int counter = -1;
     int position;
     
     while (fgets(line, 100, file) != NULL){
@@ -96,7 +98,7 @@ int  find_variables(FILE *file){//TODO Now only supported variable type is integ
   	find_name(current_token, line);
         position += strlen(current_token) + 1;
         if (strcmp(current_token, "ORG") == 0){
-	    switch(counter){
+	    switch(data_segment_counter){
 		case -1:
 	    	    set_data_segment(line);
 	    	    printf("Data segment starts at: 0x%x\n", DATA_SEGMENT);
@@ -106,7 +108,7 @@ int  find_variables(FILE *file){//TODO Now only supported variable type is integ
 	    	    printf("Code segment starts at: 0x%x\n", CODE_SEGMENT);
 		    return 1;
 	    }
-            counter ++;
+            data_segment_counter++;
 	}else{
             strcpy(variable_name, current_token);
 	    next(position, line, current_token);
@@ -114,16 +116,31 @@ int  find_variables(FILE *file){//TODO Now only supported variable type is integ
 	    next(position, line, current_token);
  	    int value = get_value(current_token);
 	    
-            MEMORY[CODE_SEGMENT + counter + 1] = value;
-            g_hash_table_insert(names, variable_name, CODE_SEGMENT + counter + 1);
-            printf("Variable %s at %x\n", variable_name, CODE_SEGMENT + counter + 1);
-            counter ++;
+            MEMORY[CODE_SEGMENT + data_segment_counter] = value;
+            g_hash_table_insert(names, variable_name, CODE_SEGMENT + data_segment_counter);
+            printf("Variable %s at %x\n", variable_name, CODE_SEGMENT + data_segment_counter);
+            data_segment_counter++;
 	} 	
     }
 }
 
 void find_labels(FILE *file){
-	printf("Finding labels...\n");
+    printf("Finding labels...\n");
+    char line[100];
+    char current_token[20];
+    int address;
+   
+    while (fgets(line, 100, file) != NULL){
+  	find_name(current_token, line);
+	int found_in_names = g_hash_table_lookup(names, current_token);
+        if (found_in_names == 0){
+	    address = DATA_SEGMENT + data_segment_counter;
+            g_hash_table_insert(names, current_token, address);
+	}
+        code_segment_counter++;
+    }
+    
+ 	
 }
 
 void parse(FILE *file){
