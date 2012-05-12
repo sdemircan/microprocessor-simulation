@@ -9,9 +9,13 @@ GHashTable* names;
 int MEMORY[MEMORY_SIZE];
 int DATA_SEGMENT;
 int CODE_SEGMENT;
+//---------------------------
+
 
 int data_segment_counter = -1;
 int code_segment_counter = 0;
+
+int offset = 0;
 
 void find_name(char *current_command, char *line){
     for(int i = 0; i < strlen(line); i++){
@@ -129,7 +133,9 @@ void find_labels(FILE *file){
     char line[100];
     char current_token[20];
     int address;
-   
+
+    offset = ftell(file);//Save code segment's offset
+
     while (fgets(line, 100, file) != NULL){
   	find_name(current_token, line);
 	int found_in_names = g_hash_table_lookup(names, current_token);
@@ -143,6 +149,17 @@ void find_labels(FILE *file){
  	
 }
 
+void put_commands_to_code_segment(FILE *file){
+    fseek(file, offset, SEEK_SET);
+
+    char line[80];
+
+    while (fgets(line, 100, file) != NULL){	
+	printf("%s", line);
+    }
+     
+}
+
 void parse(FILE *file){
    init_opcodes();
 
@@ -151,6 +168,7 @@ void parse(FILE *file){
    }else{
             find_variables(file);
             find_labels(file);
+ 	    put_commands_to_code_segment(file);		
    }
 }
 
